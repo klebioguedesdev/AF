@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerenciador de Tarefas e Notas</title>
+  <style>
+    body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-image: url('astronauta.jpg'); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+
+    h1, h2 {
+      text-align: center;
+      color: #78e14b;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+    }
+
+    .section {
+      background: rgb(106, 142, 196);
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 10px;
+      
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="text"], textarea {
+      flex: 1;
+      padding: 10px;
+      border-radius: 5px;
+      border: 2px solid #6d68b7;
+    }
+
+    button {
+      padding: 15px 15px;
+      border: none;
+      border-radius: 5px;
+      background-color: #40be42;
+      color: rgb(14, 12, 12);
+      
+    }
+
+    ul {
+      list-style: none;
+      padding:0;
+    }
+
+    li {
+      background: rgb(133, 203, 190);
+      margin: 5px 0;
+      padding: 5px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    li.completed {
+      text-decoration: line-through;
+      color: rgb(16, 0, 0);
+    }
+
+    .note {
+      background: rgb(133, 203, 190);
+      padding: 5px;
+      margin: 5px 0;
+      border-radius: 5px;
+    }
+
+    @media (max-width: 600px) {
+      .input-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Organizador Pessoal</h1>
+
+    <div class="section" id="todo-section">
+      <h2>📝 Tarefas</h2>
+      <div class="input-group">
+        <input type="text" id="todo-input" placeholder="Digite uma tarefa..." />
+        <button onclick="addTask()">Adicionar</button>
+      </div>
+      <ul id="todo-list"></ul>
+    </div>
+
+    <div class="section" id="notes-section">
+      <h2>📌 Notas Rápidas</h2>
+      <div class="input-group">
+        <textarea id="note-input" rows="3" placeholder="Digite uma anotação..."></textarea>
+        <button onclick="addNote()">Salvar</button>
+      </div>
+      <div id="notes-list"></div>
+    </div>
+  </div>
+
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script>
+    // local storage
+    $(document).ready(function () {
+      loadTasks();
+      loadNotes();
+    });
+
+    // Tarefas
+    function addTask() {
+      const taskText = $('#todo-input').val().trim();
+      if (taskText === '') return;
+
+      const task = { text: taskText, completed: false };
+      let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      tasks.push(task);
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+
+      $('#todo-input').val('');
+      loadTasks();
+    }
+
+    function toggleTask(index) {
+      let tasks = JSON.parse(localStorage.getItem('tasks'));
+      tasks[index].completed = !tasks[index].completed;
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      loadTasks();
+    }
+
+    function deleteTask(index) {
+      let tasks = JSON.parse(localStorage.getItem('tasks'));
+      tasks.splice(index, 1);
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      loadTasks();
+    }
+
+    function loadTasks() {
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      $('#todo-list').empty();
+      tasks.forEach((task, index) => {
+        const li = $(`
+          <li class="${task.completed ? 'completed' : ''}">
+            <span>${task.text}</span>
+            <div>
+              <button onclick="toggleTask(${index})">✔</button>
+              <button onclick="deleteTask(${index})">🗑</button>
+            </div>
+          </li>
+        `);
+        $('#todo-list').append(li);
+      });
+    }
+
+    // Notas
+    function addNote() {
+      const noteText = $('#note-input').val().trim();
+      if (noteText === '') return;
+
+      let notes = JSON.parse(localStorage.getItem('notes')) || [];
+      notes.push(noteText);
+      localStorage.setItem('notes', JSON.stringify(notes));
+
+      $('#note-input').val('');
+      loadNotes();
+    }
+
+    function loadNotes() {
+      const notes = JSON.parse(localStorage.getItem('notes')) || [];
+      $('#notes-list').empty();
+      notes.forEach((note, index) => {
+        const noteDiv = $(`
+          <div class="note">
+            <p>${note}</p>
+            <button onclick="deleteNote(${index})">Excluir</button>
+          </div>
+        `);
+        $('#notes-list').append(noteDiv);
+      });
+    }
+
+    function deleteNote(index) {
+      let notes = JSON.parse(localStorage.getItem('notes'));
+      notes.splice(index, 1);
+      localStorage.setItem('notes', JSON.stringify(notes));
+      loadNotes();
+    }
+  </script>
+</body>
+</html>
